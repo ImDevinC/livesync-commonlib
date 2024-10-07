@@ -1,4 +1,5 @@
 import { serialized } from "../concurrency/lock.ts";
+import PouchDB from 'pouchdb-core';
 import { Logger } from "../common/logger.ts";
 import { LRUCache } from "../memory/LRUCache.ts";
 import { shouldSplitAsPlainText, stripAllPrefixes } from "../string_and_binary/path.ts";
@@ -178,7 +179,7 @@ export async function putDBEntry(
         : (env.settings.processSmallFilesInUIThread && note.data.size < maxSize) ? splitFuncInMainThread : splitFuncInWorker;
 
     const pieces = await splitFunc(data, pieceSize, plainSplit, minimumChunkSize, filename);
-    const chunkTasks = [];
+    const chunkTasks: Promise<boolean|GeneratedChunk>[] = [];
 
     for await (const piece of pieces()) {
         processed++;

@@ -27,12 +27,13 @@ export { throttle }
 import type { SimpleStore } from "octagonal-wheels/databases/SimpleStoreBase.js";
 export type { SimpleStore }
 
+import { indexedDB } from "https://deno.land/x/indexeddb@v1.1.0/ponyfill.ts";
+
 export function resolveWithIgnoreKnownError<T>(p: Promise<T>, def: T): Promise<T> {
     return new Promise((res, rej) => {
         p.then(res).catch((ex) => (isErrorOfMissingDoc(ex) ? res(def) : rej(ex)));
     });
 }
-
 
 // Referenced below
 // https://zenn.dev/sora_kumo/articles/539d7f6e7f3c63
@@ -105,14 +106,15 @@ export function readContent(doc: LoadedEntry) {
     }
 }
 
-const isIndexDBCmpExist = typeof window?.indexedDB?.cmp !== "undefined";
+const isIndexDBCmpExist = typeof indexedDB.cmp !== "undefined";
+//const isIndexDBCmpExist = typeof window?.indexedDB?.cmp !== "undefined";
 
 export async function isDocContentSame(docA: string | string[] | Blob | ArrayBuffer, docB: string | string[] | Blob | ArrayBuffer) {
     const blob1 = createBlob(docA);
     const blob2 = createBlob(docB);
     if (blob1.size != blob2.size) return false;
     if (isIndexDBCmpExist) {
-        return window.indexedDB.cmp(await blob1.arrayBuffer(), await blob2.arrayBuffer()) === 0;
+        return indexedDB.cmp(await blob1.arrayBuffer(), await blob2.arrayBuffer()) === 0;
     }
     const checkQuantum = 10000;
     const length = blob1.size;
@@ -270,6 +272,9 @@ export function determineType(path: string, data: string | string[] | Uint8Array
 export function isAnyNote(doc: DatabaseEntry): doc is NewEntry | PlainEntry {
     return "type" in doc && (doc.type == "newnote" || doc.type == "plain");
 }
+export function isLoadedEntry(doc: DatabaseEntry): doc is LoadedEntry {
+    return "type" in doc && (doc.type == "newnote" || doc.type == "plain") && "data" in doc;
+}
 export function createSavingEntryFromLoadedEntry(doc: LoadedEntry): SavingEntry {
     const data = readAsBlob(doc);
     const type = determineType(doc.path, data);
@@ -309,4 +314,25 @@ export function escapeMarkdownValue(value: any) {
     } else {
         return value;
     }
+}
+
+export function timeDeltaToHumanReadable(delta: number) {
+    const sec = delta / 1000;
+    if (sec < 60) {
+        return `${sec.toFixed(2)}s`;
+    }
+    const min = sec / 60;
+    if (min < 60) {
+        return `${min.toFixed(2)}m`;
+    }
+    const hour = min / 60;
+    if (hour < 24) {
+        return `${hour.toFixed(2)}h`;
+    }
+    const day = hour / 24;
+    if (day < 365) {
+        return `${day.toFixed(2)}d`;
+    }
+    const year = day / 365;
+    return `${year.toFixed(2)}y`;
 }

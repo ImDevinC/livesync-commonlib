@@ -1,4 +1,5 @@
 import { decrypt, encrypt, isPathProbablyObfuscated, obfuscatePath } from "../encryption/e2ee_v2.ts";
+import PouchDB from 'pouchdb-core';
 import { serialized } from "../concurrency/lock.ts";
 import { Logger } from "../common/logger.ts";
 import { getPath } from "../string_and_binary/path.ts";
@@ -498,7 +499,7 @@ export async function purgeChunksRemote(setting: CouchDBConnection, docs: { id: 
         const CHUNK_SIZE = 100;
 
         function makeChunkedArrayFromArray<T>(items: T[]): T[][] {
-            const chunked = [];
+            const chunked: T[][] = [];
             for (let i = 0; i < items.length; i += CHUNK_SIZE) {
                 chunked.push(items.slice(i, i + CHUNK_SIZE));
             }

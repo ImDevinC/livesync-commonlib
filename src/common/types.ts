@@ -1,4 +1,5 @@
 import type { I18N_LANGS } from "./rosetta";
+import PouchDB from 'pouchdb-core';
 
 import type { TaggedType } from "octagonal-wheels/common/types";
 export type { TaggedType };
