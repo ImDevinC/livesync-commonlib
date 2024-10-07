@@ -1,4 +1,4 @@
-import { splitPieces2, splitPieces2V2 } from "../string_and_binary/chunks";
+import { splitPieces2, splitPieces2V2 } from "../string_and_binary/chunks.ts";
 
 export function terminateWorker() {
     return;

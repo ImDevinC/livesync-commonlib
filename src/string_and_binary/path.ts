@@ -180,7 +180,7 @@ export function isAccepted(path: string, ignore: string[]): boolean | undefined 
         return false;
     }
     const patterns = ignore.map(e => e.trim()).filter(e => e.length > 0 && !e.startsWith("#"));
-    let result = undefined;
+    let result: (boolean|undefined) = undefined;
     for (const pattern of patterns) {
         if (pattern.endsWith("/")) {
             // If the path ends with `/` and matched to the path. we do not handle more patterns to negate the result.
